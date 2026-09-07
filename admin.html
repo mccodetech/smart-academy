@@ -384,7 +384,6 @@
             });
         }
 
-        // കോഡ് സെർച്ചിൽ നിന്ന് എഡിറ്റ് ചെയ്യുമ്പോൾ സെക്ഷനുകളും വിഷയങ്ങളും ഓട്ടോമാറ്റിക് ആയി സെലക്ട് ചെയ്യാൻ
         function editQuestionFromSearch(actionId, sectionVal, sub, lesson, q, o1, o2, o3, o4) {
             toggleSection('manual-section');
             
@@ -407,7 +406,6 @@
                 document.getElementById('man-class').value = cls;
             }
 
-            // വിഷയം ഡ്രോപ്പ്ഡൗൺ ലോഡ് ആയ ശേഷം സബ്ജക്റ്റും പാഠവും സെറ്റ് ചെയ്യാൻ
             setTimeout(() => {
                 document.getElementById('manual-subject').value = sub;
                 document.getElementById('edit-doc-id').value = actionId;
@@ -700,17 +698,25 @@
             let sectionKey = (category === 'gk') ? 'gk' : (category + '_' + classNum);
 
             if(docId) {
+                // എഡിറ്റ് ചെയ്യുമ്പോൾ ഓപ്ഷനുകൾ ഉൾപ്പെടെയുള്ള എല്ലാ ഫീൽഡുകളും അപ്ഡേറ്റ് ചെയ്യാൻ കോഡ് നൽകിയിരിക്കുന്നു
                 db.collection('questions').doc(docId).update({
                     section: sectionKey,
-                    subject, 
+                    subject: subject, 
                     lesson: lessonNo, 
-                    Question, 
-                    Option_A, 
-                    Option_B, 
-                    Option_C, 
-                    Option_D, 
-                    answerText
-                }).then(() => { alert("ചോദ്യം അപ്ഡേറ്റ് ചെയ്തു!"); resetForm(); loadDashboardStats(); closeAllSections(); });
+                    Question: Question, 
+                    Option_A: Option_A, 
+                    Option_B: Option_B, 
+                    Option_C: Option_C, 
+                    Option_D: Option_D, 
+                    answerText: answerText
+                }).then(() => { 
+                    alert("ചോദ്യം വിജയകരമായി അപ്ഡേറ്റ് ചെയ്തു!"); 
+                    resetForm(); 
+                    loadDashboardStats(); 
+                    closeAllSections(); 
+                }).catch(err => {
+                    alert("അപ്ഡേറ്റ് ചെയ്യുന്നതിൽ പിഴവ്: " + err);
+                });
             } else {
                 db.collection('questions').add({
                     qCode: generateQCode(),
