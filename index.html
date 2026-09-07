@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Academy - Login</title>
+    
+    <!-- PWA Manifest & Theme Settings for Logo & Install -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00796b">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <style>
         body { font-family: sans-serif; background: #eef2f3; margin: 0; padding: 15px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
         .container { width: 100%; max-width: 420px; background: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: 1px solid #e0e0e0; text-align: center; }
@@ -14,6 +20,12 @@
         .submit-btn { width: 100%; padding: 14px; background-color: #00796b; color: white; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,121,107,0.3); }
         .submit-btn:hover { background-color: #004d40; }
         .icon-box { border: 2px dashed #00796b; padding: 12px; border-radius: 20px; margin-bottom: 20px; background: #e0f2f1; cursor: pointer; display: inline-block; font-size: 24px; }
+        
+        /* ഇൻസ്റ്റാൾ ചെയ്യാനുള്ള കസ്റ്റം പോപ്പ്-അപ്പ് ബോക്സ് */
+        #install-banner { display: none; background: #e0f2f1; border: 1px solid #00796b; padding: 12px; border-radius: 12px; margin-bottom: 20px; text-align: center; }
+        #install-banner p { margin: 0 0 8px 0; font-size: 13px; color: #004d40; font-weight: bold; }
+        .install-action-btn { background: #00796b; color: white; border: none; padding: 6px 14px; border-radius: 15px; font-size: 12px; font-weight: bold; cursor: pointer; }
+
         @media (max-width: 480px) {
             .container { padding: 20px; }
         }
@@ -21,6 +33,12 @@
 </head>
 <body>
     <div class="container">
+        <!-- ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യാനുള്ള ബാനർ / പ്രോംപ്റ്റ് -->
+        <div id="install-banner">
+            <p>📱 ഈ ആപ്പ് നിങ്ങളുടെ ഫോണിൽ ഇൻസ്റ്റാൾ ചെയ്യൂ!</p>
+            <button class="install-action-btn" id="install-btn">ഹോം സ്ക്രീനിൽ ചേർക്കുക (Install)</button>
+        </div>
+
         <h2 style="color: #00796b; margin-top: 0; font-size: 24px;">Smart Academy</h2>
         <p style="color: #666; font-size: 14px; margin-bottom: 25px;">ലോഗിൻ / രജിസ്ട്രേഷൻ</p>
         
@@ -64,6 +82,29 @@
             window.location.href = "dashboard.html";
         }
 
+        // PWA Install Prompt Logic (ആദ്യതവണ മാത്രം കാണിക്കാൻ)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // ഉപയോക്താവ് മുമ്പ് ഇൻസ്റ്റാൾ ചെയ്യാൻ ആവശ്യപ്പെട്ടിട്ടില്ലെങ്കിൽ മാത്രം കാണിക്കുക
+            if (!localStorage.getItem('appInstalled')) {
+                document.getElementById('install-banner').style.display = 'block';
+            }
+        });
+
+        document.getElementById('install-btn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                let { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    localStorage.setItem('appInstalled', 'true');
+                    document.getElementById('install-banner').style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
+
         const icons = ['⭐', '🍎', '⚽', '🚀', '📚', '🎨', '🦁', '🏆'];
         let currentIconIndex = 0;
 
@@ -84,7 +125,6 @@
 
             db.collection('users').where('phone', '==', phone).get().then(snapshot => {
                 if (!snapshot.empty) {
-                    // അക്കൗണ്ട് നിലവിലുണ്ട്, നേരിട്ട് ലോഗിൻ ചെയ്യുന്നു
                     let docId = snapshot.docs[0].id;
                     db.collection('users').doc(docId).update({ status: 'approved' }).then(() => {
                         localStorage.setItem('userPhone', phone);
@@ -93,12 +133,11 @@
                         window.location.href = "dashboard.html";
                     });
                 } else {
-                    // പുതിയ അക്കൗണ്ട് രജിസ്റ്റർ ചെയ്യുന്നു
                     db.collection('users').add({
                         name: name,
                         phone: phone,
                         score: 0,
-                        status: 'approved', // ആദ്യതവണ തന്നെ അപ്പ്രൂവ് ആകുന്നു
+                        status: 'approved',
                         progress: {}
                     }).then(() => {
                         localStorage.setItem('userPhone', phone);
