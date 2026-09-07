@@ -96,7 +96,7 @@
                         <select id="del-category" onchange="updateDelDropdowns()">
                             <option value="madrasa">മദ്രസ</option>
                             <option value="school">സ്കൂൾ</option>
-                            <option value="gk">GK & Current Affairs</option>
+                            <option value="gk">ജനറൽ & സ്കിൽസ്</option>
                         </select>
                     </div>
                     <div class="input-group" id="del-class-div">
@@ -122,17 +122,17 @@
                 <ul id="pending-list" style="list-style: none; padding: 0; margin: 0;"></ul>
             </div>
 
-            <!-- 4. വിഷയങ്ങൾ ക്രമീകരിക്കാൻ -->
+            <!-- 4. വിഷയങ്ങൾ ക്രമീകരിക്കാൻ (ഓർഡർ മാറ്റാനുള്ള സൗകര്യത്തോടെ) -->
             <div id="subjects-section" class="admin-section">
                 <button class="close-section-btn" onclick="closeAllSections()">ക്ലോസ് (Close)</button>
-                <h3 style="color: #00796b; margin-top: 0;">📚 വിഷയങ്ങൾ ക്രമീകരിക്കുക</h3>
+                <h3 style="color: #00796b; margin-top: 0;">📚 വിഷയങ്ങൾ ക്രമീകരിക്കുക / ഓർഡർ മാറ്റുക</h3>
                 <div class="row-group">
                     <div class="input-group">
                         <label>വിഭാഗം:</label>
                         <select id="sub-category" onchange="updateDropdowns(); fetchExistingSubjects();">
                             <option value="madrasa">മദ്രസ</option>
                             <option value="school">സ്കൂൾ</option>
-                            <option value="gk">GK & Current Affairs</option>
+                            <option value="gk">ജനറൽ & സ്കിൽസ്</option>
                         </select>
                     </div>
                     <div class="input-group" id="class-div">
@@ -145,14 +145,14 @@
                     </div>
                 </div>
                 <div class="input-group">
-                    <label>നിലവിലുള്ള വിഷയങ്ങൾ:</label>
-                    <div id="existing-subjects-display" style="padding: 8px; background: #eee; border-radius: 4px; font-size: 14px; margin-bottom: 10px; color: #333;">ഒന്നുമില്ല</div>
+                    <label>നിലവിലുള്ള വിഷയങ്ങൾ (ഈ ക്രമത്തിലാണ് ആപ്പിൽ കാണിക്കുക):</label>
+                    <div id="existing-subjects-display" style="padding: 10px; background: #eee; border-radius: 6px; font-size: 14px; margin-bottom: 10px; color: #333;">ഒന്നുമില്ല</div>
                 </div>
                 <div class="input-group">
-                    <label>പുതിയ വിഷയങ്ങൾ ചേർക്കുക (കോമ ഇട്ട് നൽകുക):</label>
-                    <input type="text" id="subject-names" placeholder="ഉദാ: ഫിഖ്ഹ്, ഹദീസ്">
+                    <label>വിഷയങ്ങളുടെ പുതിയ ലിസ്റ്റ് ക്രമത്തിൽ നൽകുക (ഉദാ: English, Maths, IQ, GK - കോമ ഇട്ട് നൽകുക):</label>
+                    <input type="text" id="subject-names" placeholder="വിഷയങ്ങൾ ഇവിടെ നൽകുക">
                 </div>
-                <button onclick="saveSubjects()" style="background-color: #0288d1; padding: 10px 20px; color:white; border:none; border-radius:6px; cursor:pointer; font-weight: bold; width: 100%;">വിഷയങ്ങൾ ചേർക്കുക</button>
+                <button onclick="saveSubjects()" style="background-color: #0288d1; padding: 10px 20px; color:white; border:none; border-radius:6px; cursor:pointer; font-weight: bold; width: 100%;">വിഷയങ്ങളുടെ ക്രമം അപ്ഡേറ്റ് ചെയ്യുക</button>
             </div>
 
             <!-- 5. ഗൂഗിൾ ഷീറ്റ് വഴി ചോദ്യങ്ങൾ ഇമ്പോർട്ട് ചെയ്യാൻ -->
@@ -165,7 +165,7 @@
                         <select id="imp-category" onchange="updateImpDropdowns()">
                             <option value="madrasa">മദ്രസ</option>
                             <option value="school">സ്കൂൾ</option>
-                            <option value="gk">GK & Current Affairs</option>
+                            <option value="gk">ജനറൽ & സ്കിൽസ്</option>
                         </select>
                     </div>
                     <div class="input-group" id="imp-class-div">
@@ -206,7 +206,7 @@
                         <select id="man-category" onchange="updateManDropdowns()">
                             <option value="madrasa">മദ്രസ</option>
                             <option value="school">സ്കൂൾ</option>
-                            <option value="gk">GK & Current Affairs</option>
+                            <option value="gk">ജനറൽ & സ്കിൽസ്</option>
                         </select>
                     </div>
                     <div class="input-group" id="man-class-div">
@@ -269,7 +269,7 @@
                         <select id="mng-category" onchange="updateMngDropdowns()">
                             <option value="madrasa">മദ്രസ</option>
                             <option value="school">സ്കൂൾ</option>
-                            <option value="gk">GK & Current Affairs</option>
+                            <option value="gk">ജനറൽ & സ്കിൽസ്</option>
                         </select>
                     </div>
                     <div class="input-group" id="mng-class-div">
@@ -461,8 +461,10 @@
             db.collection('settings').doc(docKey).get().then(doc => {
                 if(doc.exists && doc.data().subjects && doc.data().subjects.length > 0) {
                     displayBox.innerText = doc.data().subjects.join(', ');
+                    document.getElementById('subject-names').value = doc.data().subjects.join(', ');
                 } else {
                     displayBox.innerText = "ഈ ക്ലാസിൽ ഇതുവരെ വിഷയങ്ങൾ നൽകിയിട്ടില്ല.";
+                    document.getElementById('subject-names').value = "";
                 }
             });
         }
@@ -498,7 +500,7 @@
             for(let c in schoolClasses) {
                 breakhtml += `&nbsp;&nbsp;&bull; ${c}: ${schoolClasses[c]} ചോദ്യങ്ങൾ<br>`;
             }
-            breakhtml += `<br><b>🌍 GK & Current Affairs:</b> ${gkTotal} ചോദ്യങ്ങൾ<br>`;
+            breakhtml += `<br><b>🌍 ജനറൽ & സ്കിൽസ്:</b> ${gkTotal} ചോദ്യങ്ങൾ<br>`;
             breakhtml += `<hr><b>ആകെ മൊത്തം ചോദ്യങ്ങൾ:</b> ${allQuestionsCache.length}`;
 
             body.innerHTML = breakhtml;
@@ -582,6 +584,7 @@
         function loadMngSubjects() { loadSubjectsToDropdown('mng-category', 'mng-class', 'search-subject'); }
         function loadDelSubjects() { loadSubjectsToDropdown('del-category', 'del-class', 'del-subject'); }
 
+        // വിഷയങ്ങളുടെ ഓർഡർ മാറ്റാനും പുതിയവ ചേർക്കാനും (സെറ്റ് മെത്തേഡ് ഉപയോഗിച്ച്)
         function saveSubjects() {
             let category = document.getElementById('sub-category').value;
             let classNum = document.getElementById('sub-class').value;
@@ -592,10 +595,9 @@
             let docKey = (category === 'gk') ? 'gk_subjects' : (category + '_class_' + classNum);
 
             db.collection('settings').doc(docKey).set({
-                subjects: firebase.firestore.FieldValue.arrayUnion(...subjectsArray)
+                subjects: subjectsArray
             }, { merge: true }).then(() => {
-                alert("വിഷയങ്ങൾ വിജയകരമായി ചേർത്തു!");
-                document.getElementById('subject-names').value = '';
+                alert("വിഷയങ്ങളുടെ ക്രമം വിജയകരമായി അപ്ഡേറ്റ് ചെയ്തു!");
                 fetchExistingSubjects();
                 loadImpSubjects(); loadManSubjects(); loadMngSubjects(); loadDelSubjects();
             }).catch(err => {
@@ -698,7 +700,6 @@
             let sectionKey = (category === 'gk') ? 'gk' : (category + '_' + classNum);
 
             if(docId) {
-                // എഡിറ്റ് ചെയ്യുമ്പോൾ ഓപ്ഷനുകൾ ഉൾപ്പെടെയുള്ള എല്ലാ ഫീൽഡുകളും അപ്ഡേറ്റ് ചെയ്യാൻ കോഡ് നൽകിയിരിക്കുന്നു
                 db.collection('questions').doc(docId).update({
                     section: sectionKey,
                     subject: subject, 
@@ -790,6 +791,7 @@
 
             setTimeout(() => {
                 document.getElementById('manual-subject').value = sub;
+                document.getElementById('edit-doc-id').value, actionId; // കുഴപ്പമില്ലാതെ സെറ്റ് ആകാൻ താഴെ നൽകിയിരിക്കുന്നു
                 document.getElementById('edit-doc-id').value = actionId;
                 document.getElementById('manual-lesson').value = lesson;
                 document.getElementById('manual-q').value = q;
