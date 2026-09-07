@@ -15,12 +15,10 @@
         .stat-card h4 { margin: 0; color: #00796b; font-size: 13px; }
         .stat-card p { margin: 5px 0 0 0; font-size: 18px; font-weight: bold; color: #004d40; }
 
-        /* മെനു ബട്ടണുകൾ ഗ്രൂപ്പ് */
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-bottom: 15px; }
         .admin-menu-btn { padding: 14px; background-color: #00796b; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .admin-menu-btn:hover { background-color: #004d40; }
 
-        /* സെക്ഷൻ ബോക്സുകൾ */
         .admin-section { background: #f9f9f9; padding: 20px; border-radius: 10px; margin-top: 15px; border: 1px solid #e0e0e0; text-align: left; display: none; position: relative; }
         .close-section-btn { position: absolute; top: 15px; right: 15px; background: #757575; color: white; border: none; padding: 5px 10px; border-radius: 20px; font-size: 12px; cursor: pointer; font-weight: bold; }
         .close-section-btn:hover { background: #424242; }
@@ -63,7 +61,6 @@
                 </div>
             </div>
 
-            <!-- പ്രധാന മെനു ബട്ടണുകൾ (ഓരോന്നും ക്ലിക്ക് ചെയ്യുമ്പോൾ മാത്രം തുറക്കും) -->
             <div class="menu-grid">
                 <button class="admin-menu-btn" onclick="toggleSection('search-section')">🔍 കോഡ് വഴി സെർച്ച് ചെയ്യുക</button>
                 <button class="admin-menu-btn" onclick="toggleSection('delete-section')" style="background-color: #d32f2f;">⚠️ Smart Delete</button>
@@ -263,6 +260,11 @@
                 <h3 style="color: #4527a0; margin-top: 0;">⚙️ ചോദ്യങ്ങൾ മാനേജ് ചെയ്യുക (Manage Questions)</h3>
                 <div class="row-group">
                     <div class="input-group">
+                        <label>വിഭാഗവും ക്ലാസ്സും തിരഞ്ഞെടുക്കുക</label>
+                    </div>
+                </div>
+                <div class="row-group">
+                    <div class="input-group">
                         <label>വിഭാഗം:</label>
                         <select id="mng-category" onchange="updateMngDropdowns()">
                             <option value="madrasa">മദ്രസ</option>
@@ -335,7 +337,6 @@
             }
         }
 
-        // --- സെക്ഷനുകൾ ടോഗിൾ ചെയ്യാനുള്ള ഫങ്ഷൻ ---
         function toggleSection(sectionId) {
             let sections = ['search-section', 'delete-section', 'pending-section', 'subjects-section', 'import-section', 'manual-section', 'manage-section'];
             sections.forEach(id => {
@@ -374,7 +375,7 @@
                     card.innerHTML = `<span style="background: #00796b; color: white; padding: 2px 6px; font-size: 11px; border-radius: 3px; font-weight: bold;">കോഡ്: ${d.qCode}</span> 
                                       <span style="background: #e65100; color: white; padding: 2px 6px; font-size: 11px; border-radius: 3px; font-weight: bold; margin-left: 5px;">വിഷയം: ${d.subject} (പാഠം: ${d.lesson || 1})</span><br><br>
                         <b>ചോദ്യം:</b> ${d.Question} <br><b>ശരിയായ ഉത്തരം:</b> ${d.answerText} <br><br>
-                        <button class="action-btn" style="background:#0288d1;" onclick="editQuestionFromSearch('${doc.id}', '${d.subject}', '${d.lesson || 1}', '${d.Question}', '${d.Option_A}', '${d.Option_B}', '${d.Option_C}', '${d.Option_D}')">എഡിറ്റ്</button>
+                        <button class="action-btn" style="background:#0288d1;" onclick="editQuestionFromSearch('${doc.id}', '${d.section || ''}', '${d.subject}', '${d.lesson || 1}', '${d.Question}', '${d.Option_A}', '${d.Option_B}', '${d.Option_C}', '${d.Option_D}')">എഡിറ്റ്</button>
                         <button class="action-btn" style="background:#d32f2f;" onclick="deleteQuestion('${doc.id}')">ഡിലീറ്റ്</button>`;
                     resultContainer.appendChild(card);
                 });
@@ -383,9 +384,42 @@
             });
         }
 
-        function editQuestionFromSearch(actionId, sub, lesson, q, o1, o2, o3, o4) {
+        // കോഡ് സെർച്ചിൽ നിന്ന് എഡിറ്റ് ചെയ്യുമ്പോൾ സെക്ഷനുകളും വിഷയങ്ങളും ഓട്ടോമാറ്റിക് ആയി സെലക്ട് ചെയ്യാൻ
+        function editQuestionFromSearch(actionId, sectionVal, sub, lesson, q, o1, o2, o3, o4) {
             toggleSection('manual-section');
-            editQuestion(actionId, sub, lesson, q, o1, o2, o3, o4);
+            
+            let cat = "madrasa";
+            let cls = "1";
+            if(sectionVal.startsWith("school")) {
+                cat = "school";
+                cls = sectionVal.replace("school_", "");
+            } else if(sectionVal.startsWith("madrasa")) {
+                cat = "madrasa";
+                cls = sectionVal.replace("madrasa_", "");
+            } else if(sectionVal === "gk") {
+                cat = "gk";
+            }
+
+            document.getElementById('man-category').value = cat;
+            updateManDropdowns();
+            
+            if(cat !== 'gk') {
+                document.getElementById('man-class').value = cls;
+            }
+
+            // വിഷയം ഡ്രോപ്പ്ഡൗൺ ലോഡ് ആയ ശേഷം സബ്ജക്റ്റും പാഠവും സെറ്റ് ചെയ്യാൻ
+            setTimeout(() => {
+                document.getElementById('manual-subject').value = sub;
+                document.getElementById('edit-doc-id').value = actionId;
+                document.getElementById('manual-lesson').value = lesson;
+                document.getElementById('manual-q').value = q;
+                document.getElementById('manual-opt1').value = o1;
+                document.getElementById('manual-opt2').value = o2;
+                document.getElementById('manual-opt3').value = o3;
+                document.getElementById('manual-opt4').value = o4;
+                document.getElementById('form-title').innerText = "✏️ ചോദ്യം എഡിറ്റ് ചെയ്യുക";
+                document.getElementById('save-q-btn').innerText = "അപ്ഡേറ്റ് ചെയ്യുക";
+            }, 300);
         }
 
         function deleteSubjectQuestions() {
@@ -667,7 +701,15 @@
 
             if(docId) {
                 db.collection('questions').doc(docId).update({
-                    subject, lesson: lessonNo, Question, Option_A, Option_B, Option_C, Option_D, answerText
+                    section: sectionKey,
+                    subject, 
+                    lesson: lessonNo, 
+                    Question, 
+                    Option_A, 
+                    Option_B, 
+                    Option_C, 
+                    Option_D, 
+                    answerText
                 }).then(() => { alert("ചോദ്യം അപ്ഡേറ്റ് ചെയ്തു!"); resetForm(); loadDashboardStats(); closeAllSections(); });
             } else {
                 db.collection('questions').add({
@@ -713,25 +755,46 @@
                     card.innerHTML = `<span style="background: #00796b; color: white; padding: 2px 6px; font-size: 11px; border-radius: 3px; font-weight: bold;">കോഡ്: ${d.qCode || 'N/A'}</span> 
                                       <span style="background: #e65100; color: white; padding: 2px 6px; font-size: 11px; border-radius: 3px; font-weight: bold; margin-left: 5px;">പാഠം: ${d.lesson || 1}</span><br><br>
                         <b>ചോദ്യം:</b> ${d.Question} <br><b>ഉത്തരം:</b> ${d.answerText} <br><br>
-                        <button class="action-btn" style="background:#0288d1;" onclick="editQuestion('${doc.id}', '${d.subject}', '${d.lesson || 1}', '${d.Question}', '${d.Option_A}', '${d.Option_B}', '${d.Option_C}', '${d.Option_D}')">എഡിറ്റ്</button>
+                        <button class="action-btn" style="background:#0288d1;" onclick="editQuestion('${doc.id}', '${d.section || ''}', '${d.subject}', '${d.lesson || 1}', '${d.Question}', '${d.Option_A}', '${d.Option_B}', '${d.Option_C}', '${d.Option_D}')">എഡിറ്റ്</button>
                         <button class="action-btn" style="background:#d32f2f;" onclick="deleteQuestion('${doc.id}')">ഡിലീറ്റ്</button>`;
                     container.appendChild(card);
                 });
             });
         }
 
-        function editQuestion(actionId, sub, lesson, q, o1, o2, o3, o4) {
-            document.getElementById('edit-doc-id').value = actionId;
-            document.getElementById('manual-subject').value = sub;
-            document.getElementById('manual-lesson').value = lesson;
-            document.getElementById('manual-q').value = q;
-            document.getElementById('manual-opt1').value = o1;
-            document.getElementById('manual-opt2').value = o2;
-            document.getElementById('manual-opt3').value = o3;
-            document.getElementById('manual-opt4').value = o4;
-            document.getElementById('form-title').innerText = "✏️ ചോദ്യം എഡിറ്റ് ചെയ്യുക";
-            document.getElementById('save-q-btn').innerText = "അപ്ഡേറ്റ് ചെയ്യുക";
-            toggleSection('manual-section');
+        function editQuestion(actionId, sectionVal, sub, lesson, q, o1, o2, o3, o4) {
+            let cat = "madrasa";
+            let cls = "1";
+            if(sectionVal.startsWith("school")) {
+                cat = "school";
+                cls = sectionVal.replace("school_", "");
+            } else if(sectionVal.startsWith("madrasa")) {
+                cat = "madrasa";
+                cls = sectionVal.replace("madrasa_", "");
+            } else if(sectionVal === "gk") {
+                cat = "gk";
+            }
+
+            document.getElementById('man-category').value = cat;
+            updateManDropdowns();
+            
+            if(cat !== 'gk') {
+                document.getElementById('man-class').value = cls;
+            }
+
+            setTimeout(() => {
+                document.getElementById('manual-subject').value = sub;
+                document.getElementById('edit-doc-id').value = actionId;
+                document.getElementById('manual-lesson').value = lesson;
+                document.getElementById('manual-q').value = q;
+                document.getElementById('manual-opt1').value = o1;
+                document.getElementById('manual-opt2').value = o2;
+                document.getElementById('manual-opt3').value = o3;
+                document.getElementById('manual-opt4').value = o4;
+                document.getElementById('form-title').innerText = "✏️ ചോദ്യം എഡിറ്റ് ചെയ്യുക";
+                document.getElementById('save-q-btn').innerText = "അപ്ഡേറ്റ് ചെയ്യുക";
+                toggleSection('manual-section');
+            }, 300);
         }
 
         function deleteQuestion(id) {
