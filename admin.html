@@ -53,7 +53,20 @@
                 </div>
             </div>
 
-            <!-- ഒരു നിശ്ചിത വിഷയത്തിലെ ചോദ്യങ്ങൾ മാത്രം ഡിലീറ്റ് ചെയ്യാൻ (Smart Delete) -->
+            <!-- കോഡ് വഴി ചോദ്യം സെർച്ച് ചെയ്യാനുള്ള പുതിയ സെക്ഷൻ -->
+            <div class="admin-section" style="background: #e0f2f1; border-color: #b2dfdb;">
+                <h3 style="color: #00796b; margin-top: 0;">🔍 കോഡ് വഴി ചോദ്യം കണ്ടെത്തുക (Search by Q-Code)</h3>
+                <div class="row-group">
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <input type="text" id="search-code-input" placeholder="ഉദാ: Q-KKDE അല്ലെങ്കിൽ Q-BRZZ" style="text-transform: uppercase;">
+                    </div>
+                    <div>
+                        <button onclick="searchQuestionByCode()" style="background-color: #00796b; padding: 10px 20px; color:white; border:none; border-radius:6px; cursor:pointer; font-weight: bold; height: 100%;">സെർച്ച് ചെയ്യുക</button>
+                    </div>
+                </div>
+                <div id="code-search-result-container" style="margin-top: 15px;"></div>
+            </div>
+
             <div class="admin-section" style="background: #ffebee; border-color: #ffcdd2;">
                 <h3 style="color: #c62828; margin-top: 0;">⚠️ നിശ്ചിത വിഷയം മാത്രം ക്ലീൻ ചെയ്യാം (Smart Delete)</h3>
                 <div class="row-group">
@@ -292,7 +305,39 @@
             }
         }
 
-        // തിരഞ്ഞെടുത്ത വിഷയത്തിലെ ചോദ്യങ്ങൾ മാത്രം ഡിലീറ്റ് ചെയ്യാൻ
+        // --- കോഡ് വഴി ചോദ്യം സെർച്ച് ചെയ്യാനുള്ള ഫങ്ക്ഷൻ ---
+        function searchQuestionByCode() {
+            let code = document.getElementById('search-code-input').value.trim().toUpperCase();
+            let resultContainer = document.getElementById('code-search-result-container');
+            if(!code) { alert("ദയവായി ചോദ്യത്തിന്റെ കോഡ് നൽകുക!"); return; }
+
+            resultContainer.innerHTML = '<p style="color:#00796b;">തെരയുന്നു...</p>';
+
+            db.collection('questions').where('qCode', '==', code).get().then(snapshot => {
+                resultContainer.innerHTML = '';
+                if(snapshot.empty) {
+                    resultContainer.innerHTML = `<p style="color:red; font-weight:bold;">'${code}' കോഡിൽ ചോദ്യങ്ങൾ ഒന്നും കണ്ടെത്തിയില്ല!</p>`;
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    let d = doc.data();
+                    let card = document.createElement('div');
+                    card.className = 'question-card';
+                    card.style.background = "#fff";
+                    card.style.border = "1px solid #00796b";
+                    card.innerHTML = `<span style="background: #00796b; color: white; padding: 2px 6px; font-size: 11px; border-radius: 3px; font-weight: bold;">കോഡ്: ${d.qCode}</span> 
+                                      <span style="background: #e65100; color: white; padding: 2px 6px; font-size: 11px; border-radius: 3px; font-weight: bold; margin-left: 5px;">വിഷയം: ${d.subject} (പാഠം: ${d.lesson || 1})</span><br><br>
+                        <b>ചോദ്യം:</b> ${d.Question} <br><b>ശരിയായ ഉത്തരം:</b> ${d.answerText} <br><br>
+                        <button class="action-btn" style="background:#0288d1;" onclick="editQuestion('${doc.id}', '${d.subject}', '${d.lesson || 1}', '${d.Question}', '${d.Option_A}', '${d.Option_B}', '${d.Option_C}', '${d.Option_D}')">എഡിറ്റ്</button>
+                        <button class="action-btn" style="background:#d32f2f;" onclick="deleteQuestion('${doc.id}')">ഡിലീറ്റ്</button>`;
+                    resultContainer.appendChild(card);
+                });
+            }).catch(err => {
+                resultContainer.innerHTML = `<p style="color:red;">എറർ സംഭവിച്ചു: ${err}</p>`;
+            });
+        }
+
         function deleteSubjectQuestions() {
             let subjectName = document.getElementById('del-subject').value;
             if(!subjectName) { alert("ദയവായി വിഷയം തിരഞ്ഞെടുക്കുക!"); return; }
